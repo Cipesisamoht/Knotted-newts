@@ -1,4 +1,4 @@
-[a,b,c,d] = KnotSplit([4,2,5,1,2,6,3,5,6,4,1,3])
+Jones([4,2,5,1,2,6,3,5,6,4,1,3])
 
 
 function x = Writhe(knot) %Findds Writhe of an inputed planar Diagram
@@ -23,7 +23,7 @@ c = knot(3);
 d = knot(4);
 First0 = 0;
 Second0 = 0;
-if a == b || c == d
+if a == b || c == d % there is an issue here with duplicate numbers
     First0 = 1;
 end
 if a == d || b == c
@@ -49,29 +49,43 @@ end
 
 function x = Jones(knot) %finds the jones polynomial of a knot WIP
 writhe = Writhe(knot);
-Length = length(knot)/4;
+Length1 = length(knot)/4;
 xnew = knot;
 x1 = [];
 amount = 1;
 loopCache = [0];
-loopCacheNew = loopcache;
-while Length > 1
+loopCacheNew = loopCache;
+while Length1 > 1 %breaks the knot down untill there is only a single intersection left
     x1 = xnew;
     xnew = [];
     loopCache = loopCacheNew;
     loopCacheNew = [];
     for i = 1:amount
-        xcurrent = x1(4*i*Length-4*Length+1:4*i*Length);
-        [a,a0,b,b0] = KnotSplit(xcurrent)
-        xnew = [xnew+a+b];
-        loopCurrent1 = loopCache(i)
+        xcurrent = x1(4*i*Length1-4*Length1+1:4*i*Length1);
+        [a,a0,b,b0] = KnotSplit(xcurrent);
+        xnew = [xnew, a, b];
+        loopCurrent1 = loopCache(i); %counts the amount of extra loops in the subknots
         loopCurrent2 = loopCurrent1 + b0;
         loopCurrent1 = loopCurrent1 + a0;
-        loopCacheNew = [loopCacheNew+loopCurrent1+loopCurrent2];
+        loopCacheNew = [loopCacheNew, loopCurrent1, loopCurrent2];
     end
-    length = length-1;
+    Length1 = Length1-1;
     amount = amount*2;
 end
 x1 = xnew;
 loopCache = loopCacheNew;
+loopCacheNew = [];
+for i = 1:length(x1)/4 %does the final break only counting the exess loops
+    if x1(4*i-3)==x1(4*i-2)
+        a0 = 1; b0 = 0;
+    else
+        b0 = 1; a0 = 0;
+    end
+    loopCurrent1 = loopCache(i);
+    loopCurrent2 = loopCurrent1 + b0;
+    loopCurrent1 = loopCurrent1 + a0;
+    loopCacheNew = [loopCacheNew, loopCurrent1, loopCurrent2];
+end
+loopCache = loopCacheNew; %finds the number of loops in each subknot after split so there are no more intersections
+x = loopCache; %need to turn this into the actual polynomial
 end
