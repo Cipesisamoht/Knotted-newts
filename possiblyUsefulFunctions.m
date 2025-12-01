@@ -1,4 +1,4 @@
-Jones([4,2,5,1,2,6,3,5,6,4,1,3])
+Kaufmann([4,2,5,1,2,6,3,5,6,4,1,3])
 
 
 function x = Writhe(knot) %Findds Writhe of an inputed planar Diagram
@@ -47,9 +47,9 @@ for i = 1:length(First)
 end
 end
 
-function x = Jones(knot) %finds the jones polynomial of a knot WIP
-writhe = Writhe(knot);
+function x = Kaufmann(knot) %finds the jones polynomial of a knot WIP
 Length1 = length(knot)/4;
+Length2 = Length1;
 xnew = knot;
 x1 = [];
 amount = 1;
@@ -87,5 +87,53 @@ for i = 1:length(x1)/4 %does the final break only counting the exess loops
     loopCacheNew = [loopCacheNew, loopCurrent1, loopCurrent2];
 end
 loopCache = loopCacheNew; %finds the number of loops in each subknot after split so there are no more intersections
-x = loopCache; %need to turn this into the actual polynomial
+poly = [0]; 
+first = 0;
+last = 0;
+for i = 1:length(loopCache)
+    position = 0;
+    for j = 1:Length2
+        floatLength = length(loopCache);
+        if i > floatLength/(2^j) %this does not work as intended (can never find down afer up)
+            position = position + 1;
+        else
+            position = position -1;
+        end
+    end
+    positions = [position];
+    positionsNew = [];
+    multiply = 1;
+    numberof = 1;
+    if loopCache(i) > 0
+        for j = 1:loopCache(i)
+            multiply = -multiply;
+            for k = 1:numberof
+                positionsNew = [positionsNew, positions(k)-2, positions(k)+2];
+                positionsNew = unique(positionsNew);
+            end
+            numberof = numberof+1;
+            positions = positionsNew;
+            positionsNew = [];
+        end
+    else
+        positions = [position];
+    end
+    oldFirst = first;
+    first = min([first, positions]);
+    if oldFirst ~= first
+        difference = oldFirst-first;
+        poly = [zeros(1,difference), poly];
+    end
+    oldLast = last;
+    last = max([last,positions]);
+    if oldLast ~= last
+        difference = last-oldLast;
+        poly = [poly,zeros(1,difference)];
+    end
+    for j = 1:length(positions)
+        current = positions(j);
+        poly(current-first+1) = poly(current-first+1)+multiply;
+    end
+end
+x = [-first, poly];
 end
