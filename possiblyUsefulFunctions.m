@@ -1,5 +1,4 @@
-Kaufmann([4,2,5,1,2,6,3,5,6,4,1,3])
-
+Jones([4,2,5,1,2,6,3,5,6,4,1,3])
 
 function x = Writhe(knot) %Findds Writhe of an inputed planar Diagram
 L = length(knot);
@@ -23,7 +22,7 @@ c = knot(3);
 d = knot(4);
 First0 = 0;
 Second0 = 0;
-if a == b || c == d % there is an issue here with duplicate numbers
+if a == b || c == d
     First0 = 1;
 end
 if a == d || b == c
@@ -36,18 +35,31 @@ for i = 1:length(First)
         First(i) = a;
     end
     if First(i) == d
-        First(i) = c;
+        if c==b
+            First(i) = a;
+        else
+            First(i) = c; 
+        end
     end
-    if Second(i) == d
-        Second(i) = a;
-    end
-    if Second(i) == c
-        Second(i) = b;
+    if c==d
+        if Second(i) == a
+            Second(i) = d;
+        end
+        if Second(i) == b
+            Second(i) = c;
+        end
+    else
+        if Second(i) == d
+            Second(i) = a;
+        end
+        if Second(i) == c
+            Second(i) = b;
+        end
     end
 end
 end
 
-function x = Kaufmann(knot) %finds the jones polynomial of a knot WIP
+function x = Kaufmann(knot) %finds the kaufmann polynomial of a knot
 Length1 = length(knot)/4;
 Length2 = Length1;
 xnew = knot;
@@ -92,10 +104,12 @@ first = 0;
 last = 0;
 for i = 1:length(loopCache)
     position = 0;
+    currentI = i;
     for j = 1:Length2
         floatLength = length(loopCache);
-        if i > floatLength/(2^j) %this does not work as intended (can never find down afer up)
+        if currentI > floatLength/(2^j)
             position = position + 1;
+            currentI = currentI-floatLength/(2^j);
         else
             position = position -1;
         end
@@ -132,8 +146,18 @@ for i = 1:length(loopCache)
     end
     for j = 1:length(positions)
         current = positions(j);
-        poly(current-first+1) = poly(current-first+1)+multiply;
+        poly(current-first+1) = poly(current-first+1)+multiply*nchoosek(length(positions)-1,j-1);
     end
 end
 x = [-first, poly];
+end
+
+function x = Jones(knot)
+poly=Kaufmann(knot);
+writhe1 = Writhe(knot);
+order = poly(1);
+poly = poly(2:end);
+poly = poly.*(-1);
+order = order-3*writhe1;
+x = [order,poly];
 end
