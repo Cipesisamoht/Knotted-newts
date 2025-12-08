@@ -1,4 +1,4 @@
-Jones([4,2,5,1,2,6,3,5,6,4,1,3])
+Jones([1,4,2,5,5,2,6,3,3,6,4,1])
 
 function x = Writhe(knot) %Findds Writhe of an inputed planar Diagram
 L = length(knot);
@@ -7,10 +7,15 @@ x = 0;
 for i = 1:L
     First = knot(4*i-2);
     Second = knot(4*i);
+    if abs(First-Second)~=1
+        temp = First;
+        First = Second;
+        Second = temp;
+    end
     if First < Second
-        x = x-1;
-    else
         x = x+1;
+    else
+        x = x-1;
     end
 end
 end
@@ -23,43 +28,43 @@ d = knot(4);
 First0 = 0;
 Second0 = 0;
 if a == b || c == d
-    First0 = 1;
+    Second0 = 1;
 end
 if a == d || b == c
-    Second0 = 1;
+    First0 = 1;
 end
 First = knot(5:end);
 Second = First;
 for i = 1:length(First)
-    if First(i) == b
-        First(i) = a;
+    if Second(i) == b
+        Second(i) = a;
     end
-    if First(i) == d
+    if Second(i) == d
         if c==b
-            First(i) = a;
+            Second(i) = a;
         else
-            First(i) = c; 
+            Second(i) = c; 
         end
     end
     if c==d
-        if Second(i) == a
-            Second(i) = d;
+        if First(i) == a
+            First(i) = d;
         end
-        if Second(i) == b
-            Second(i) = c;
+        if First(i) == b
+            First(i) = c;
         end
     else
-        if Second(i) == d
-            Second(i) = a;
+        if First(i) == d
+            First(i) = a;
         end
-        if Second(i) == c
-            Second(i) = b;
+        if First(i) == c
+            First(i) = b;
         end
     end
 end
 end
 
-function x = Kaufmann(knot) %finds the kaufmann polynomial of a knot
+function x = Kaufmann(knot) %finds the kauffman bracket of a knot
 Length1 = length(knot)/4;
 Length2 = Length1;
 xnew = knot;
@@ -89,9 +94,9 @@ loopCache = loopCacheNew;
 loopCacheNew = [];
 for i = 1:length(x1)/4 %does the final break only counting the exess loops
     if x1(4*i-3)==x1(4*i-2)
-        a0 = 1; b0 = 0;
-    else
         b0 = 1; a0 = 0;
+    else
+        a0 = 1; b0 = 0;
     end
     loopCurrent1 = loopCache(i);
     loopCurrent2 = loopCurrent1 + b0;
@@ -114,7 +119,7 @@ for i = 1:length(loopCache)
             position = position -1;
         end
     end
-    positions = [position];
+    positions = [position]; %finds the starting position of each elment of loopCache
     positionsNew = [];
     multiply = 1;
     numberof = 1;
@@ -131,7 +136,7 @@ for i = 1:length(loopCache)
         end
     else
         positions = [position];
-    end
+    end %starts generating the polynomial
     oldFirst = first;
     first = min([first, positions]);
     if oldFirst ~= first
@@ -146,13 +151,13 @@ for i = 1:length(loopCache)
     end
     for j = 1:length(positions)
         current = positions(j);
-        poly(current-first+1) = poly(current-first+1)+multiply*nchoosek(length(positions)-1,j-1);
+        poly(current-first+1) = poly(current-first+1)+multiply*nchoosek(length(positions)-1,j-1); %writes into the poly function
     end
 end
 x = [-first, poly];
 end
 
-function x = Jones(knot)
+function x = Jones(knot)% uses the kauffman function to find the Jones polynomial
 poly=Kaufmann(knot);
 writhe1 = Writhe(knot);
 order = poly(1);
