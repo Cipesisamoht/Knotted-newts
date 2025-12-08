@@ -1,4 +1,4 @@
-Jones([1,4,2,5,5,2,6,3,3,6,4,1])
+Jones([4,2,5,1,2,6,3,5,6,4,1,3])
 
 function x = Writhe(knot) %Findds Writhe of an inputed planar Diagram
 L = length(knot);
@@ -13,9 +13,9 @@ for i = 1:L
         Second = temp;
     end
     if First < Second
-        x = x+1;
-    else
         x = x-1;
+    else
+        x = x+1;
     end
 end
 end
@@ -28,37 +28,37 @@ d = knot(4);
 First0 = 0;
 Second0 = 0;
 if a == b || c == d
-    Second0 = 1;
+    First0 = 1;
 end
 if a == d || b == c
-    First0 = 1;
+    Second0 = 1;
 end
 First = knot(5:end);
 Second = First;
 for i = 1:length(First)
-    if Second(i) == b
-        Second(i) = a;
+    if First(i) == b
+        First(i) = a;
     end
-    if Second(i) == d
+    if First(i) == d
         if c==b
-            Second(i) = a;
+            First(i) = a;
         else
-            Second(i) = c; 
+            First(i) = c; 
         end
     end
     if c==d
-        if First(i) == a
-            First(i) = d;
+        if Second(i) == a
+            Second(i) = d;
         end
-        if First(i) == b
-            First(i) = c;
+        if Second(i) == b
+            Second(i) = c;
         end
     else
-        if First(i) == d
-            First(i) = a;
+        if Second(i) == d
+            Second(i) = a;
         end
-        if First(i) == c
-            First(i) = b;
+        if Second(i) == c
+            Second(i) = b;
         end
     end
 end
@@ -94,9 +94,9 @@ loopCache = loopCacheNew;
 loopCacheNew = [];
 for i = 1:length(x1)/4 %does the final break only counting the exess loops
     if x1(4*i-3)==x1(4*i-2)
-        b0 = 1; a0 = 0;
-    else
         a0 = 1; b0 = 0;
+    else
+        b0 = 1; a0 = 0;
     end
     loopCurrent1 = loopCache(i);
     loopCurrent2 = loopCurrent1 + b0;
