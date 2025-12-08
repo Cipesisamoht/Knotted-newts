@@ -11,48 +11,28 @@ function [PD, arcMat] = braid_to_pd(word, m)
     % Initialisation
     arcMat = zeros(m, n+1);
     currentArc = 1;
-    startRow   = find(arcMat(:,1) == 0, 1, 'first');
-    currentRow = startRow;
-    arcMat(currentRow, 1) = currentArc;
+    currentRow = 1;
+    arcMat(1, 1) = 1;
 
     % Fill arcMat
-    while any(arcMat(:) == 0)
+    for i = 1:m
         for j = 1:n
-            gen = word(j);
-            k   = abs(gen);
+            k = abs(word(j));
             if currentRow == k
                 currentRow = k + 1;
                 currentArc = currentArc + 1;
             elseif currentRow == k + 1
                 currentRow = k;
                 currentArc = currentArc + 1;
-            else
             end
-
-            if arcMat(currentRow, j+1) == 0
-                arcMat(currentRow, j+1) = currentArc;
-            end
+            arcMat(currentRow, j+1) = currentArc;
         end
-
-        endRow = currentRow;
-
-        if arcMat(endRow, 1) == 0
-            arcMat(endRow, 1) = currentArc;
+        if arcMat(currentRow, 1) == 0
+            arcMat(currentRow, 1) = currentArc;
         else
-            nextRow = find(arcMat(:,1) == 0, 1, 'first');
-            if isempty(nextRow)
-                break;
-            else
-                currentRow = nextRow;
-                currentArc = currentArc + 1;
-                if arcMat(currentRow, 1) == 0
-                    arcMat(currentRow, 1) = currentArc;
-                end
-            end
-        end
-
-        if ~any(arcMat(:) == 0)
-            break;
+            arcMat(arcMat == currentArc) = arcMat(currentRow, 1);
+            currentRow = find(arcMat(:,1) == 0, 1, 'first');
+            arcMat(currentRow, 1) = currentArc;
         end
     end
 
@@ -60,43 +40,17 @@ function [PD, arcMat] = braid_to_pd(word, m)
     PD = zeros(n, 4);
 
     for j = 1:n
-        gen = word(j);
-        k   = abs(gen);
+        k = abs(word(j));
 
-        a = arcMat(k,   j    ); 
-        b = arcMat(k,   j+1  ); 
-        c = arcMat(k+1, j+1  ); 
-        d = arcMat(k+1, j    ); 
+        a = arcMat(k,   j);
+        b = arcMat(k+1, j);
+        c = arcMat(k+1, j+1);
+        d = arcMat(k,   j+1);
 
-        if gen > 0
-            PD(j, :) = [d, c, b, a];
+        if word(j) < 0
+            PD(j, :) = [a, b, c, d];
         else
-            PD(j, :) = [a, d, c, b];
-        end
-    end
-
-    % Merge closure arcs
-    [arcMat, PD] = mergeClosureArcs(arcMat, PD);
-end
-
-
-function [arcMat, PD] = mergeClosureArcs(arcMat, PD)
-%   Adjust arc labels to avoid extra numbers
-
-    [m, nPlus1] = size(arcMat);
-    lastCol = nPlus1;
-
-    for r = 1:m
-        a_start = arcMat(r, 1);
-        a_end   = arcMat(r, lastCol);
-
-        if a_start ~= a_end
-            keep = min(a_start, a_end);
-            kill = max(a_start, a_end);
-
-            arcMat(arcMat == kill) = keep;
-
-            PD(PD == kill) = keep;
+            PD(j, :) = [b, c, d, a];
         end
     end
 end
