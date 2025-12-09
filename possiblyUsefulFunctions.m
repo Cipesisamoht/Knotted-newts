@@ -162,7 +162,7 @@ poly=Kaufmann(knot);
 writhe1 = Writhe(knot);
 order = poly(1);
 poly = poly(2:end);
-poly = poly.*(-1);
+poly = poly.*((-1)^writhe1);
 order = order-3*writhe1;
 x = [order,poly];
 end
