@@ -1,62 +1,79 @@
 word = [];
-PD_arr = braid_to_pd(word)
+PD_arr = braid_to_PD(word)
 
-function [PD_arr] = braid_to_pd(word)
-% Converts a braid word to a planar diagram
+function [PD_arr] = braid_to_PD(word)
+% braid_to_PD Convert a braid word to a planar diagram
+
+% Input: word - row or column vector of braid generators
+
+% Output: PD_arr - 1*4n array encoding the planar diagram with n crossings,
+% ensuring correct notation for input to other functions for computing the 
+% writhe, Kauffman bracket and Jones Polynomial
     
-    % Ensure inputs are correct and calculate how many strands are necessary
+    % Ensure inputs are correct and determine size of braid
     word = word(:).';
-    n = numel(word);
-    m = max(abs(word)) + 1;
-    if any(abs(word) < 1
+    n = numel(word);         % number of crossings
+    m = max(abs(word)) + 1;  % number of strands
+    if any(abs(word) < 1)
         error('Invalid braid word inputted');
     end
 
-    % Initialise matrix and starting values
-    arcMat = zeros(m, n+1);
-    currentArc = 1;
-    currentRow = 1;
-    arcMat(1, 1) = 1;
+% Step 1:    
 
-    % Traverse arcMat with Braid word m times to fill with arc values
+    % Initialise arc labelling matrix and starting values
+    arc_mat = zeros(m, n+1);
+    current_arc = 1;
+    current_row = 1;
+    arc_mat(1, 1) = 1;
+
+    % Traverse arc_mat 'm' times for each operation 'n' of the braid word
+    % to fill with arc values
     for i = 1:m
         for j = 1:n
         
-            % Check if the crossings affect current strand path
+            % Check if the current strand participates in the crossing and 
+            % adjust current_row and current_arc accordingly
             k = abs(word(j));
-            if currentRow == k
-                currentRow = k + 1;
-                currentArc = currentArc + 1;
-            elseif currentRow == k + 1
-                currentRow = k;
-                currentArc = currentArc + 1;
+            if current_row == k
+                current_row = k + 1;
+                current_arc = current_arc + 1;
+            elseif current_row == k + 1
+                current_row = k;
+                current_arc = current_arc + 1;
             end
-            arcMat(currentRow, j+1) = currentArc;
+            % Fill the next matrix component with the correct arc value
+            arc_mat(current_row, j+1) = current_arc;
         end
 
-        % Ensure braid connection gives consistent arc values from 1 to n with no gaps
-        if arcMat(currentRow, 1) == 0
-            arcMat(currentRow, 1) = currentArc;
+        % Close this strand of the braid and ensure matrix gives consistent
+        % arc values from 1 to n, with no arc having more than 1 number
+        if arc_mat(current_row, 1) == 0
+            arc_mat(current_row, 1) = current_arc;
         else
-            arcMat(arcMat == currentArc) = arcMat(currentRow, 1);
-            currentRow = find(arcMat(:,1) == 0, 1, 'first');
-            arcMat(currentRow, 1) = currentArc;
+            arc_mat(arc_mat == current_arc) = arc_mat(current_row, 1);
+            current_row = find(arc_mat(:,1) == 0, 1, 'first');
+            arc_mat(current_row, 1) = current_arc;
         end
     end
 
-    % Building Planar Diagram
+% Step 2:
+
+    % Initialise matrix to hold four arc labels around each crossing
     PD_mat = zeros(n, 4);
 
+    % Find arc values for all n crossings
     for j = 1:n
+
+        % Find all four arc values for a crossing
         k = abs(word(j));
 
-        % Find arc values for each crossing
-        a = arcMat(k,   j);
-        b = arcMat(k+1, j);
-        c = arcMat(k+1, j+1);
-        d = arcMat(k,   j+1);
+        a = arc_mat(k,   j);
+        b = arc_mat(k+1, j);
+        c = arc_mat(k+1, j+1);
+        d = arc_mat(k,   j+1);
 
-        % Define planar diagram notation in matrix form
+        % Ensure arc orders are correct depending on sign of the braid 
+        % operation, so that PD notation is correct for further computation
         if word(j) < 0
             PD_mat(j, :) = [a, b, c, d];
         else
@@ -67,4 +84,3 @@ function [PD_arr] = braid_to_pd(word)
     % Format as an array for Jones Polynomial function computation
     PD_arr = reshape(PD_mat.', 1, []);
 end
-
