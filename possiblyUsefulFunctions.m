@@ -20,7 +20,7 @@ for i = 1:L
 end
 end
 
-function [First,First0,Second,Second0] = KnotSplit(knot) %Used in Jones Function input is planar diagram
+function [First,First0,Second,Second0] = KnotSplit(knot) %Used in kaufman Function input is planar diagram
 a = knot(1);
 b = knot(2);
 c = knot(3);
@@ -64,7 +64,7 @@ for i = 1:length(First)
 end
 end
 
-function x = Kaufmann(knot) %finds the kauffman bracket of a knot
+function x = Kaufmann(knot) %finds the kaufman bracket of a knot output form is [highest power of A, coeficient of highest power, coeficient of second highest power ...]
 Length1 = length(knot)/4;
 Length2 = Length1;
 xnew = knot;
@@ -157,7 +157,7 @@ end
 x = [-first, poly];
 end
 
-function x = Jones(knot)% uses the kauffman function to find the Jones polynomial
+function x = Jones(knot)% uses the kauffman function to find the Jones polynomial. output form is [highest power of A, coeficient of highest power, coeficient of second highest power ...]
 poly=Kaufmann(knot);
 writhe1 = Writhe(knot);
 order = poly(1);
